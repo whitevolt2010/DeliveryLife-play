@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head><!-- dl-split --><script>(function(){var P={"Build/Web.data.unityweb": {"n": 2, "size": 108195758}};
+  <head><!-- dl-split --><script>(function(){var P={"Build/Web.data.unityweb": {"n": 2, "size": 108194437}};
 var F=window.fetch.bind(window);
 window.fetch=function(input,init){
   var u=(typeof input==="string")?input:input.url;
@@ -13,7 +13,15 @@ window.fetch=function(input,init){
     return Promise.resolve(new Response(s,{status:200,headers:{"Content-Length":String(P[k].size),"Content-Type":"application/octet-stream"}}));
   }}
   return F(input,init);
-};})();</script><!-- dl-split -->
+};})();</script><!-- dl-split --><!-- dl-full --><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.webmanifest">
+<style>html,body{margin:0;padding:0;width:100%;height:100%;background:#000;overflow:hidden;overscroll-behavior:none}
+#unity-container,#unity-container.unity-desktop,#unity-container.unity-mobile{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;margin:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;transform:none!important}
+#unity-canvas{width:100%!important;height:100%!important;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#unity-footer{display:none!important}
+#dl-fs{position:fixed;left:10px;top:10px;z-index:10;padding:8px 12px;border-radius:10px;border:0;background:rgba(0,0,0,.55);color:#fff;font:bold 15px sans-serif}
+#dl-rot{display:none;position:fixed;inset:0;z-index:20;background:#000;color:#fff;font:bold 20px sans-serif;align-items:center;justify-content:center;text-align:center}
+@media (orientation:portrait) and (pointer:coarse){#dl-rot{display:flex}}</style><!-- dl-full -->
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | DeliveryLife</title>
@@ -142,5 +150,18 @@ window.fetch=function(input,init){
       document.body.appendChild(script);
 
     </script>
-  </body>
+  <!-- dl-fullbody --><button id="dl-fs">⛶ 전체화면</button><div id="dl-rot">📱 휴대폰을 가로로 돌려 주세요</div>
+<script>(function(){
+var d=document,e=d.documentElement,b=d.getElementById('dl-fs');
+var can=!!(e.requestFullscreen||e.webkitRequestFullscreen);
+function isFs(){return !!(d.fullscreenElement||d.webkitFullscreenElement)||(navigator.standalone===true)||matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches;}
+function go(){try{var p=(e.requestFullscreen||e.webkitRequestFullscreen).call(e);if(p&&p.then)p.then(lock).catch(function(){});else lock();}catch(x){}}
+function lock(){try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(function(){});}catch(x){}}
+function upd(){b.style.display=(isFs())?'none':'block';if(!can)b.textContent='공유 → 홈 화면에 추가 하면 전체화면';}
+b.onclick=function(ev){ev.stopPropagation();if(can)go();};
+var first=true;d.addEventListener('touchend',function(){if(first&&can&&!isFs()){first=false;go();}},{passive:true});
+d.addEventListener('fullscreenchange',upd);d.addEventListener('webkitfullscreenchange',upd);
+d.addEventListener('touchmove',function(ev){ev.preventDefault();},{passive:false});
+upd();setTimeout(function(){if(!can)b.style.display='none';},8000);
+})();</script><!-- dl-fullbody --></body>
 </html>
