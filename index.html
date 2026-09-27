@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head><!-- dl-split --><script>(function(){var V="20260927135354";window.DL_VERSION=V;var P={"Build/Web.data.unityweb": {"n": 2, "size": 112640347}};
+  <head><!-- dl-split --><script>(function(){var V="20260927143852";window.DL_VERSION=V;var P={"Build/Web.data.unityweb": {"n": 2, "size": 112640347}};
 var F=window.fetch.bind(window);
 function withV(u){return u.indexOf("/Build/")>=0?u.split("?")[0]+"?v="+V:u;}
 window.fetch=function(input,init){
@@ -95,12 +95,12 @@ setInterval(check,300000);
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Web.loader.js?v=20260927135354";
+      var loaderUrl = buildUrl + "/Web.loader.js?v=20260927143852";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/Web.data.unityweb?v=20260927135354",
-        frameworkUrl: buildUrl + "/Web.framework.js.unityweb?v=20260927135354",
-        codeUrl: buildUrl + "/Web.wasm.unityweb?v=20260927135354",
+        dataUrl: buildUrl + "/Web.data.unityweb?v=20260927143852",
+        frameworkUrl: buildUrl + "/Web.framework.js.unityweb?v=20260927143852",
+        codeUrl: buildUrl + "/Web.wasm.unityweb?v=20260927143852",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "DeliveryLife",
@@ -159,6 +159,10 @@ setInterval(check,300000);
         createUnityInstance(canvas, config, (progress) => {
           document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
               }).then((unityInstance) => {
+                window.dlUnity = unityInstance;
+                var dlSave = function () { try { unityInstance.SendMessage("SessionRunner", "SaveNow"); } catch (x) {} };
+                document.addEventListener("visibilitychange", function () { if (document.hidden) dlSave(); });
+                window.addEventListener("pagehide", dlSave);
                 document.querySelector("#unity-loading-bar").style.display = "none";
                 document.querySelector("#unity-fullscreen-button").onclick = () => {
                   unityInstance.SetFullscreen(1);
