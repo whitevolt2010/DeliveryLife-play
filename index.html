@@ -1,19 +1,41 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head><!-- dl-split --><script>(function(){var P={"Build/Web.data.unityweb": {"n": 2, "size": 108201106}};
+  <head><!-- dl-split --><script>(function(){var V="20260927085402";window.DL_VERSION=V;var P={"Build/Web.data.unityweb": {"n": 2, "size": 112639574}};
 var F=window.fetch.bind(window);
+function withV(u){return u.indexOf("/Build/")>=0?u.split("?")[0]+"?v="+V:u;}
 window.fetch=function(input,init){
   var u=(typeof input==="string")?input:input.url;
   for(var k in P){ if(u.indexOf(k)>=0 && u.indexOf(".part")<0){
     var n=P[k].n,i=0,base=u.split("?")[0];
     var s=new ReadableStream({pull:function(c){
       if(i>=n){c.close();return;}
-      return F(base+".part"+(i++)).then(function(r){if(!r.ok)throw new Error("조각 받기 실패 "+r.status);return r.arrayBuffer();})
+      return F(base+".part"+(i++)+"?v="+V).then(function(r){if(!r.ok)throw new Error("조각 받기 실패 "+r.status);return r.arrayBuffer();})
         .then(function(b){c.enqueue(new Uint8Array(b));});}});
     return Promise.resolve(new Response(s,{status:200,headers:{"Content-Length":String(P[k].size),"Content-Type":"application/octet-stream"}}));
   }}
+  if(typeof input==="string")return F(withV(input),init);
   return F(input,init);
-};})();</script><!-- dl-split --><!-- dl-full --><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+};
+// 새 버전 확인 — 홈 화면 아이콘으로 열면 새로고침 버튼이 없다(2026-09-26 사용자).
+// 열 때 · 앱으로 돌아올 때마다 version.json 을 캐시 없이 받아 보고, 바뀌었으면 새 버전으로 다시 연다.
+var started=Date.now();
+function check(){
+  F("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(j){
+    if(!j||!j.v||j.v===V)return;
+    if(Date.now()-started<20000){location.replace("./?v="+j.v);return;}   // 막 연 참이면 바로 새 버전
+    var b=document.getElementById("dl-upd");
+    if(!b){b=document.createElement("button");b.id="dl-upd";
+      b.style.cssText="position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:30;padding:10px 18px;border:0;border-radius:12px;background:#ffcc33;color:#222;font:bold 16px sans-serif";
+      b.textContent="🆕 새 버전이 있어요 — 누르면 업데이트";
+      b.onclick=function(){location.replace("./?v="+j.v);};
+      (document.body||document.documentElement).appendChild(b);}
+  }).catch(function(){});
+}
+check();
+document.addEventListener("visibilitychange",function(){if(!document.hidden)check();});
+window.addEventListener("pageshow",check);
+setInterval(check,300000);
+})();</script><!-- dl-split --><!-- dl-full --><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.webmanifest">
 <style>html,body{margin:0;padding:0;width:100%;height:100%;background:#000;overflow:hidden;overscroll-behavior:none}
 #unity-container,#unity-container.unity-desktop,#unity-container.unity-mobile{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;margin:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;transform:none!important}
@@ -73,12 +95,12 @@ window.fetch=function(input,init){
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Web.loader.js";
+      var loaderUrl = buildUrl + "/Web.loader.js?v=20260927085402";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/Web.data.unityweb",
-        frameworkUrl: buildUrl + "/Web.framework.js.unityweb",
-        codeUrl: buildUrl + "/Web.wasm.unityweb",
+        dataUrl: buildUrl + "/Web.data.unityweb?v=20260927085402",
+        frameworkUrl: buildUrl + "/Web.framework.js.unityweb?v=20260927085402",
+        codeUrl: buildUrl + "/Web.wasm.unityweb?v=20260927085402",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "DeliveryLife",
