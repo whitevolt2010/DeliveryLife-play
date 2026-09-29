@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head><!-- dl-split --><script>(function(){var V="20260929075257";window.DL_VERSION=V;var P={"Build/Web.data.unityweb": {"n": 2, "size": 132648213}};
+  <head><!-- dl-split --><script>(function(){var V="20260929125625";window.DL_VERSION=V;var P={"Build/Web.data.unityweb": {"n": 2, "size": 105363518}};
 var F=window.fetch.bind(window);
 function withV(u){return u.indexOf("/Build/")>=0?u.split("?")[0]+"?v="+V:u;}
 window.fetch=function(input,init){
@@ -95,12 +95,12 @@ setInterval(check,300000);
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Web.loader.js?v=20260929075257";
+      var loaderUrl = buildUrl + "/Web.loader.js?v=20260929125625";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/Web.data.unityweb?v=20260929075257",
-        frameworkUrl: buildUrl + "/Web.framework.js.unityweb?v=20260929075257",
-        codeUrl: buildUrl + "/Web.wasm.unityweb?v=20260929075257",
+        dataUrl: buildUrl + "/Web.data.unityweb?v=20260929125625",
+        frameworkUrl: buildUrl + "/Web.framework.js.unityweb?v=20260929125625",
+        codeUrl: buildUrl + "/Web.wasm.unityweb?v=20260929125625",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "DeliveryLife",
@@ -189,5 +189,21 @@ var first=true;d.addEventListener('touchend',function(){if(first&&can&&!isFs()){
 d.addEventListener('fullscreenchange',upd);d.addEventListener('webkitfullscreenchange',upd);
 d.addEventListener('touchmove',function(ev){ev.preventDefault();},{passive:false});
 upd();setTimeout(function(){if(!can)b.style.display='none';},8000);
+// 세로로 돌렸을 때 (2026-09-29 사용자 "가로모드하다가 세로모드 되면 게임이 사라지고 이어하기로 해야 다시 할 수 있다")
+// 예전: 캔버스가 세로 크기로 바뀌며 Unity 가 화면 버퍼를 새로 잡음 → 메모리 1GB 넘는 아이폰이 탭을 죽이고 새로 연다.
+// 지금: 세로가 되면 게임 칸을 마지막 가로 크기 그대로 얼려 둔다(크기 변화 0 → 새 할당 0). 화면은 "가로로 돌려 주세요" 가 덮는다.
+// 그래도 혹시 죽을 때를 대비해 세로로 도는 순간 바로 저장한다.
+var L=null,wasP=false;
+function portrait(){return matchMedia('(orientation:portrait) and (pointer:coarse)').matches;}
+function rot(){var c=d.getElementById('unity-container');if(!c)return;
+  if(!portrait()){wasP=false;L={w:innerWidth,h:innerHeight};c.style.removeProperty('width');c.style.removeProperty('height');c.style.removeProperty('visibility');return;}
+  if(L){c.style.setProperty('width',L.w+'px','important');c.style.setProperty('height',L.h+'px','important');}
+  c.style.setProperty('visibility','hidden','important');
+  if(!wasP){wasP=true;try{window.dlUnity&&window.dlUnity.SendMessage('SessionRunner','SaveNow');}catch(x){}}}
+window.dlRot=rot;
+if(!portrait())L={w:innerWidth,h:innerHeight};
+matchMedia('(orientation:portrait)').addEventListener('change',rot);
+window.addEventListener('resize',rot);window.addEventListener('orientationchange',rot);
+rot();
 })();</script><!-- dl-fullbody --></body>
 </html>
