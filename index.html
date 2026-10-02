@@ -1,6 +1,52 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head><!-- dl-split --><script>(function(){var V="20261002150156";window.DL_VERSION=V;var P={"Build/Web.data.unityweb": {"n": 2, "size": 122618960}};
+  <head><!-- dl-idbguard --><script>/* dl-idbguard — 여러 탭에서 저장이 지워지는 것 막기 (2026-10-02 Codex 검수 "다중 탭에서 QA 저장 소실")
+ *
+ * 원인: Unity 웹 저장(IDBFS)은 탭마다 메모리에 파일 사본을 들고 있다가, 파일이 바뀌면
+ *   "내 사본 전체 = 정답" 으로 IndexedDB 와 맞춘다. 그래서
+ *   (1) 내 사본에 없는 파일은 IndexedDB 에서 지운다 → 나중에 열린 다른 탭이 만든 저장이 사라진다.
+ *   (2) 내 사본의 시각이 다르면 덮어쓴다 → 다른 탭이 더 최근에 저장한 걸 옛날 것으로 되돌린다.
+ * 고침: 이 탭이 열린 뒤에 이 탭이 직접 고친 파일만 올리고, 이 탭이 열리기 전부터 있던 파일만 지운다.
+ *   - 올리기(put): 파일 시각이 이 탭 시작 시각보다 옛날이면(= 열 때 받아 온 그대로) 건너뛴다.
+ *   - 지우기(delete): IndexedDB 쪽 시각이 이 탭 시작 뒤면(= 다른 탭이 새로 쓴 것) 건너뛴다.
+ * 대상: Unity 저장 DB(/idbfs…)의 FILE_DATA 만. 다른 DB(캐시 등)는 그대로.
+ */
+(function () {
+  if (window.__dlIdbGuard) return;
+  var START = Date.now() - 1;   // 같은 밀리초 경계 대비 1ms 여유
+  var P = window.IDBObjectStore && IDBObjectStore.prototype;
+  if (!P) return;
+  var put0 = P.put, del0 = P['delete'];
+  function ours(store) {
+    try { return store.name === 'FILE_DATA' && String(store.transaction.db.name).indexOf('/idbfs') === 0; } catch (x) { return false; }
+  }
+  function ts(v) { var t = v && v.timestamp; return t && t.getTime ? t.getTime() : (typeof t === 'number' ? t : NaN); }
+  var stats = { putSkipped: 0, delSkipped: 0, put: 0, del: 0 };
+  var mine = {};   // 이 탭이 올린 파일 → 마지막으로 올린 시각. 내가 만든 건 내가 지울 수 있어야 한다(새 게임 시 세이브 지우기 등).
+  P.put = function (value, key) {
+    if (ours(this)) {
+      var t = ts(value);
+      if (!isNaN(t) && t < START) { stats.putSkipped++; return this.get(key); }   // 받아 온 그대로 → 올릴 필요 없음(다른 탭의 최신본을 지키기)
+      stats.put++;
+      if (!isNaN(t)) mine[key] = t;
+    }
+    return put0.apply(this, arguments);
+  };
+  P['delete'] = function (key) {
+    if (!ours(this)) return del0.apply(this, arguments);
+    var store = this, req = store.get(key);
+    req.addEventListener('success', function () {
+      var t = ts(req.result);
+      // 이 탭이 열린 뒤 '다른 탭' 이 쓴 파일이면 지우지 않는다. 이 탭이 마지막으로 쓴 그대로면 지워도 된다.
+      if (!isNaN(t) && t >= START && !(key in mine && t <= mine[key])) { stats.delSkipped++; return; }
+      stats.del++;
+      try { del0.call(store, key); } catch (x) {}
+    });
+    return req;
+  };
+  window.__dlIdbGuard = stats;
+})();
+</script><!-- dl-idbguard --><!-- dl-split --><script>(function(){var V="20261002200208";window.DL_VERSION=V;var P={"Build/Web.data.unityweb": {"n": 2, "size": 122625103}};
 var F=window.fetch.bind(window);
 function withV(u){return u.indexOf("/Build/")>=0?u.split("?")[0]+"?v="+V:u;}
 window.fetch=function(input,init){
@@ -95,12 +141,12 @@ setInterval(check,300000);
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Web.loader.js?v=20261002150156";
+      var loaderUrl = buildUrl + "/Web.loader.js?v=20261002200208";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/Web.data.unityweb?v=20261002150156",
-        frameworkUrl: buildUrl + "/Web.framework.js.unityweb?v=20261002150156",
-        codeUrl: buildUrl + "/Web.wasm.unityweb?v=20261002150156",
+        dataUrl: buildUrl + "/Web.data.unityweb?v=20261002200208",
+        frameworkUrl: buildUrl + "/Web.framework.js.unityweb?v=20261002200208",
+        codeUrl: buildUrl + "/Web.wasm.unityweb?v=20261002200208",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "DeliveryLife",
